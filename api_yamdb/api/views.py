@@ -48,6 +48,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     Для POST-, DELETE- и PATCH-запросов доступ для администратора.
     Возможна фильрация по: slug категории, slug жанра, name, year.
     """
+    queryset = Title.objects.all()
     serializer_class = TitleSerializer
     pagination_class = pagination.LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
