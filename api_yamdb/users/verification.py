@@ -8,7 +8,7 @@ from users.models import VerificationEmailKey
 
 
 def get_key():
-    """Генерация ключа по sha256"""
+    """Генерация ключа по sha256."""
     key = ''.join(choice(ascii_lowercase) for _ in range(24))
     return sha256(key.encode()).hexdigest()
 

@@ -29,7 +29,8 @@ class VerificationEmailKey(models.Model):
     """Модель ключей подтверждения."""
     key = models.CharField(
         verbose_name='Key',
-        max_length=64
+        max_length=64,
+        primary_key=True
     )
     user = models.ForeignKey(
         User,
