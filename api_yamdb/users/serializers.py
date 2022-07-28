@@ -1,6 +1,9 @@
 from django.shortcuts import get_object_or_404
+from djoser.serializers import UserSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+from rest_framework_simplejwt.tokens import RefreshToken
+
 from users.models import User, VerificationEmailKey
 
 
@@ -21,10 +24,13 @@ class ConfirmationCodeSerializer(serializers.Serializer):
         return attrs
 
 
-class AuthTokenSerializer(serializers.Serializer):
-    """Сериализатор получения токена."""
+class TokenSerializer(serializers.Serializer):
     username = serializers.CharField()
     confirmation_code = serializers.CharField(max_length=64)
+
+    @classmethod
+    def get_token(cls, user):
+        return RefreshToken.for_user(user)
 
     def validate(self, attrs):
         username = attrs.get('username')
@@ -42,11 +48,43 @@ class AuthTokenSerializer(serializers.Serializer):
         else:
             msg = 'Поля "username" и "confirmation_code" обязательны.'
             raise serializers.ValidationError(msg)
-        attrs['user'] = user
+        user = get_object_or_404(User, username=username)
+        token = self.get_token(user)
+        print(token)
+        attrs['token'] = str(token.access_token)
         return attrs
 
 
 class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        max_length=150,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    username = serializers.CharField(
+        max_length=150,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+
+    def validate(self, attrs):
+        username = attrs.get('username')
+        try:
+            if username.lower() == 'me':
+                msg = 'Имя позователя не может быть "me".'
+                raise serializers.ValidationError(msg)
+        except AttributeError:
+            return attrs
+        return attrs
+
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name',
+            'last_name', 'bio', 'role'
+        )
+
+
+class UserMeSerializer(UserSerializer):
+    role = serializers.CharField(read_only=True)
 
     class Meta:
         model = User
