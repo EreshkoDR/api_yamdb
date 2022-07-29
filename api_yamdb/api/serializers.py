@@ -2,8 +2,7 @@ from datetime import datetime
 
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-from review.models import Comment, Review
-from reviews.models import Category, Genre, Title
+from review.models import Comment, Review, Category, Genre, Title
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -34,7 +33,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Неверная оценка')
 
 
-class Comment(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(read_only=True,
                                           slug_field='username')
     class Meta:

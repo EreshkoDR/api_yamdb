@@ -1,13 +1,12 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, mixins, viewsets
-from review.models import Comment, Review
+from review.models import Comment, Review, Category, Genre, Title
 
 from .permissions import (IsAdminPermission, IsModeratorPermission,
                           IsUserPermission)
 from .serializers import CommentSerializer, ReviewSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
-from reviews.models import Category, Genre, Title
 
 from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
 
