@@ -1,8 +1,8 @@
 from rest_framework import filters, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, mixins
-from rest_framework.decorators import action
 
 from api.permissions import IsAdminPermission, IsUserPermission
 from users.models import User
@@ -46,10 +46,10 @@ class TokenView(CreateModelViewSet):
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-    ~~Вьюсет пользователей. При эндпоинте "users/me/" сериализатор меняется
-    на UserMeSerializer, пермишены меняются на IsUserPermission.~~
+    Вьюсет пользователей. При эндпоинте "users/me/" вызвается функция get_me()
+    
 
-    ~~# Пока работает, не трогать.~~
+    # Пока работает, не трогать.~~
     """
     serializer_class = UserSerializer
     queryset = User.objects.all()
