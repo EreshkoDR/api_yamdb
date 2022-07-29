@@ -12,7 +12,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date')
+        fields = ('id', 'text', 'author', 'rating', 'pub_date')
 
     validators = [UniqueTogetherValidator(
             queryset=Review.objects.all(),
@@ -21,14 +21,22 @@ class ReviewSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, data):
-        title_id = self.context['view'].kwargs.get('title_id')
-        author = self.context['request'].user
-        if Review.objects.filter(
-            author=author, title=title_id).exists():
-            raise serializers.ValidationError('У вас уже есть отзыв на это.')
+        author = self.context.get('request').user
+        title_id = self.context.get('view').kwargs.get('title_id')
+
+        if (
+            self.context.get('request').method == 'POST'
+            and Review.objects.filter(
+                title_id=title_id, author_id=author.id
+            ).exists()
+        ):
+            raise serializers.ValidationError(
+                'Вы уже оставляли свой отзыв на данное произведение'
+            )
         return data
 
-    def validate_score(self, value):
+
+    def validate_rating(self, value):
         if not 1 <= value <= 10:
             raise serializers.ValidationError('Неверная оценка')
 
@@ -36,6 +44,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(read_only=True,
                                           slug_field='username')
+    review = serializers.SlugRelatedField(slug_field='text', read_only=True)
     class Meta:
         model = Comment
         fields = '__all__'

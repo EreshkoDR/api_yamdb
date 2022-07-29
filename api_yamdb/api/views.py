@@ -1,10 +1,9 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, mixins, viewsets
 from review.models import Comment, Review, Category, Genre, Title
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from .permissions import (IsAdminPermission, IsModeratorPermission,
-                          IsUserPermission, AllowModeratorOrAuthorOrReadOnly, AllowadminOrReadOnly)
+                          IsUserPermission)
 from .serializers import CommentSerializer, ReviewSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
@@ -13,7 +12,6 @@ from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [AllowModeratorOrAuthorOrReadOnly, IsAuthenticatedOrReadOnly]
     def get_queryset(self):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
         return review.comments.all()
@@ -24,7 +22,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [AllowModeratorOrAuthorOrReadOnly, IsAuthenticatedOrReadOnly]
+    permission_classes = [IsUserPermission,]
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
@@ -49,7 +47,6 @@ class CategoryViewSet(mixins.ListModelMixin,
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = [AllowModeratorOrAuthorOrReadOnly, ]
 
 
 class GenreViewSet(mixins.ListModelMixin,
@@ -65,7 +62,6 @@ class GenreViewSet(mixins.ListModelMixin,
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = [AllowadminOrReadOnly, ]
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -81,4 +77,3 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_fields = (
         'category__slug', 'genre__slug', 'name', 'year'
     )
-    permission_classes = [AllowadminOrReadOnly, ]
