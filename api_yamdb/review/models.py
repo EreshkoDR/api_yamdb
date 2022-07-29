@@ -24,7 +24,7 @@ class Review(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['titles', 'author'],
                                     name='uniq_review')]
-class Comment(CreatedModel):
+class Comment(models.Model):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
