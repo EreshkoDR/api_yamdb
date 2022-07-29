@@ -46,10 +46,10 @@ class TokenView(CreateModelViewSet):
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-    Вьюсет пользователей. При эндпоинте "users/me/" вызвается функция get_me()
-    
-
-    # Пока работает, не трогать.~~
+    # Вьюсет пользователей.
+    При эндпоинте "users/me/" вызвается функция get_me().
+    GET-запрос возвращает информацию о пользователе.
+    PATCH-запрос обновляет информацию о пользователе.
     """
     serializer_class = UserSerializer
     queryset = User.objects.all()
