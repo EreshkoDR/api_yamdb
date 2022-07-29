@@ -1,7 +1,6 @@
 from django.shortcuts import get_object_or_404
 from review.models import Comment, Review
 from rest_framework import filters, mixins, viewsets
-
 from .serializers import (CommentSerializer, ReviewSerializer)
 
 
