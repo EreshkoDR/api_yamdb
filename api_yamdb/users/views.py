@@ -1,8 +1,8 @@
 from rest_framework import filters, status, viewsets
-from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, mixins
+from rest_framework.decorators import action
 
 from api.permissions import IsAdminPermission, IsUserPermission
 from users.models import User
@@ -46,10 +46,10 @@ class TokenView(CreateModelViewSet):
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-    Вьюсет пользователей. При эндпоинте "users/me/" сериализатор меняется
-    на UserMeSerializer, пермишены меняются на IsUserPermission.
+    ~~Вьюсет пользователей. При эндпоинте "users/me/" сериализатор меняется
+    на UserMeSerializer, пермишены меняются на IsUserPermission.~~
 
-    # Пока работает, не трогать.
+    ~~# Пока работает, не трогать.~~
     """
     serializer_class = UserSerializer
     queryset = User.objects.all()
@@ -59,30 +59,18 @@ class UserViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAdminPermission, )
 
-    def get_permissions(self):
-        if self.kwargs.get('username') == 'me':
-            permission_classes = [IsUserPermission]
-        else:
-            permission_classes = [IsAdminPermission]
-        return [permission() for permission in permission_classes]
-
-    def get_serializer(self, *args, **kwargs):
-        if (
-            self.kwargs.get('username') == 'me'
-            and (self.action == 'partial_update' or self.action == 'update')
-        ):
-            serializer_class = UserMeSerializer
-            kwargs.setdefault('context', self.get_serializer_context())
-            return serializer_class(*args, **kwargs)
-        return super().get_serializer(*args, **kwargs)
-
-    def get_object(self):
-        if self.kwargs.get('username').lower() == 'me':
-            return self.request.user
-        return super().get_object()
-
-    def destroy(self, request, *args, **kwargs):
-        if self.kwargs.get('username').lower() == 'me':
-            msg = 'Вы не можете удалить себя'
-            raise MethodNotAllowed(msg)
-        return super().destroy(request, *args, **kwargs)
+    @action(
+        methods=['get', "patch"], url_path='me',
+        permission_classes=[IsUserPermission], detail=False)
+    def get_me(self, request, pk=None):
+        if request.method != 'PATCH':
+            serializer = UserMeSerializer(request.user)
+            return Response(serializer.data)
+        instance = request.user
+        serializer = UserMeSerializer(
+            instance,
+            data=request.data,
+            partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
