@@ -3,9 +3,7 @@ from rest_framework import permissions
 
 class IsAdminPermission(permissions.BasePermission):
     """Разрешения уровня `администратор`."""
-
     def has_permission(self, request, view):
-        print('Test IsAdmin')
         if request.user.is_authenticated:
             return (
                 request.user.role == 'admin'
@@ -33,7 +31,6 @@ class IsModeratorPermission(permissions.BasePermission):
         return False
 
     def has_object_permission(self, request, view, obj):
-
         if request.user.is_authenticated:
             return (
                 request.user.role == 'moderator'
