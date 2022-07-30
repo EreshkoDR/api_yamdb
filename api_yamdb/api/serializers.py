@@ -9,33 +9,51 @@ from review.models import Comment, Review, Category, Genre, Title, GenreTitle
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        # fields = '__all__'
-        # Здесь лучше явно обозначить поля или исключить "id" т.к.
-        # по документации и по тестам должно выходить быть
-        # только два поля: "name" и "slug"
-        #
-        # Теперь тесты проходятся
         fields = ('name', 'slug')
         model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
+
     class Meta:
-        # То же самое что и в CategorySerializer
         fields = ('name', 'slug')
         model = Genre
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
+    # slug = serializers.SlugRelatedField(
+    #     many=True,
+    #     slug_field='slug',
+    #     queryset=Genre.objects.all()
+    # )
+
+    def to_internal_value(self, data):
+        try:
+            obj = Genre.objects.get(slug=data)
+        except Exception:
+            msg = f'Жанра {data} не существует'
+            raise serializers.ValidationError(msg)
+        return obj
+
+    class Meta:
+        model = Genre
+        fields = ('name', 'slug')
+
+    # def to_representation(self, instance):
+    #     return {
+    #         'name': instance.name,
+    #         'slug': instance.slug
+    #     }
+
+
+class TitleSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField()
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all()
     )
-    genre = serializers.SlugRelatedField(
-        many=True, slug_field='slug', queryset=Genre.objects.all()
-    )
+    genre = TitleCreateSerializer(many=True)
     year = serializers.IntegerField()
 
     def create(self, validated_data):
@@ -57,25 +75,6 @@ class TitleCreateSerializer(serializers.ModelSerializer):
                 'Проверьте год произведения'
             )
         return value
-
-
-class TitleSerializer(serializers.ModelSerializer):
-    category = serializers.SlugRelatedField(
-        slug_field='slug',
-        read_only=True
-    )
-    genre = GenreSerializer(many=True, read_only=True)
-    rating = serializers.IntegerField()
-
-    def validate_rating(self, value):
-        if value == '0':
-            value = None
-            return value
-        return value
-
-    class Meta:
-        fields = "__all__"
-        model = Title
 
 
 class ReviewSerializer(serializers.ModelSerializer):

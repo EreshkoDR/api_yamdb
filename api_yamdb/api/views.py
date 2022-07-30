@@ -25,27 +25,10 @@ class CategoryViewSet(mixins.ListModelMixin,
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    # Добавил исправленный пермишин
-    # изменил поле поиска при детализации с "pk" на "slug" (см. lookup_field)
-    # подключил пагинацию
-    # сделал костыльный метод обхода authentication_classes при
-    # GET-запросе, пока думаю как сделать более грамотно
-    #
-    # На данный момент неверно возвращает данные, нужно исправить
-    # (см. tests\test_02_category.py:82)
-    #
-    # upd: Исправлено см. serializers.CategorySerializer
     lookup_field = 'slug'
     permission_classes = (ReadOrAdminPermission, )
     pagination_class = LimitOffsetPagination
-    queryset = Category.objects.all() # Без этого не заработает :)
-
-    # Костыльный способ обхода аутентификации
-    # def get_authenticators(self):
-    #     if self.request.method == 'GET':
-    #         authentication_classes = []
-    #         return authentication_classes
-    #     return super().get_authenticators()
+    queryset = Category.objects.all()
 
 
 class GenreViewSet(mixins.ListModelMixin,
@@ -61,11 +44,6 @@ class GenreViewSet(mixins.ListModelMixin,
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    # Здесь то же самое что и ввьюсете категорий
-    # Ошибка такая в тестах схожая, наверное нужно искать в сериализаторе
-    # (см. tests\test_03_genre.py:73)
-    #
-    # upd: Исправлено см. serializers.GenreSerializer
     lookup_field = 'slug'
     permission_classes = (ReadOrAdminPermission, )
     pagination_class = LimitOffsetPagination
@@ -86,13 +64,13 @@ class TitleViewSet(viewsets.ModelViewSet):
         'category__slug', 'genre__slug', 'name', 'year'
     )
     # lookup_field = 'pk'
-    permission_classes = (ReadOrAdminPermission, )
+    permission_classes = []
     pagination_class = LimitOffsetPagination
 
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return TitleCreateSerializer
-        return super().get_serializer_class()
+    # def get_serializer_class(self):
+    #     if self.action == 'create':
+    #         return TitleCreateSerializer
+    #     return super().get_serializer_class()
 
 
 class CommentViewSet(viewsets.ModelViewSet):
