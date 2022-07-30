@@ -20,6 +20,11 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    # slug = serializers.SlugRelatedField(
+    #     slug_field='slug',
+    #     read_only=True
+    # )
+
     class Meta:
         # То же самое что и в CategorySerializer
         fields = ('name', 'slug')
@@ -27,10 +32,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    name = ...
-    year = ...
-    genre = ...
-    category = ...
+    # category = CategorySerializer()
+    genre = GenreSerializer(many=True)
 
     class Meta:
         fields = '__all__'
@@ -43,6 +46,16 @@ class TitleSerializer(serializers.ModelSerializer):
                 'Проверьте год произведения'
             )
         return value
+
+    def validate(self, attrs):
+        genre = attrs.get('genre')
+        category = attrs.get('category')
+        genre = Genre.objects.get(slug=genre)
+        category = Category.objects.get(slug=category)
+        attrs['genre'] = genre
+        attrs['category'] = category
+        print(attrs)
+        return attrs
 
 
 class ReviewSerializer(serializers.ModelSerializer):

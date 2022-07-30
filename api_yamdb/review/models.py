@@ -1,3 +1,4 @@
+from tkinter import CASCADE
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -51,11 +52,14 @@ class Title(models.Model):
     description = models.TextField(
         'Описание', blank=True
     )
-    genre = models.ForeignKey(
-        Genre,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='titles'
+    # genre = models.ForeignKey(
+    #     Genre,
+    #     on_delete=models.SET_NULL,
+    #     null=True,
+    #     related_name='titles'
+    # )
+    genre = models.ManyToManyField(
+        Genre, through='GenreTitle'
     )
     category = models.ForeignKey(
         Category,
@@ -70,6 +74,11 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class GenreTitle(models.Model):
+    title = models.ForeignKey(Title, on_delete=CASCADE)
+    genre = models.ForeignKey(Genre, on_delete=CASCADE)
 
 
 class Review(models.Model):

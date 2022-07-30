@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from requests import Response
 from rest_framework import filters, mixins, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 
@@ -85,8 +86,38 @@ class TitleViewSet(viewsets.ModelViewSet):
         'category__slug', 'genre__slug', 'name', 'year'
     )
     # lookup_field = 'pk'
-    permission_classes = (ReadOrAdminPermission, )
+    permission_classes = []
     pagination_class = LimitOffsetPagination
+
+    # def create(self, request, *args, **kwargs):
+    #     serializer = self.get_serializer(data=request.data)
+    #     genre = ...
+    #     category = ...
+
+    #     return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        print('create')
+        print(request.data)
+        genres = request.data['genre']
+        category = request.data['category']
+        try:
+            genry_dict = []
+            for genre in genres:
+                genry_dict.append(Genre.objects.get(slug=genre).id) 
+        except Exception:
+            return Response({"not found"})
+        try:
+            category = Category.objects.get(slug=category).id
+        except Exception:
+            return Response({"not found"})
+        print(genry_dict)
+        print(category)
+        request.data['genre'] = genry_dict
+        request.data['category'] = category
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -112,3 +143,4 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
+        
