@@ -26,7 +26,9 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
 
 
-class TitleSerializer(serializers.ModelSerializer):
+class TitleCreateSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField()
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all()
@@ -34,16 +36,18 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         many=True, slug_field='slug', queryset=Genre.objects.all()
     )
+    year = serializers.IntegerField()
 
     def create(self, validated_data):
         genres = validated_data.pop('genre')
         title = Title.objects.create(**validated_data)
         for genre in genres:
             GenreTitle.objects.create(title=title, genre=genre)
+
         return title
 
     class Meta:
-        fields = '__all__'
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
         model = Title
 
     def validate_year(self, value):
@@ -53,6 +57,25 @@ class TitleSerializer(serializers.ModelSerializer):
                 'Проверьте год произведения'
             )
         return value
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        read_only=True
+    )
+    genre = GenreSerializer(many=True, read_only=True)
+    rating = serializers.IntegerField()
+
+    def validate_rating(self, value):
+        if value == '0':
+            value = None
+            return value
+        return value
+
+    class Meta:
+        fields = "__all__"
+        model = Title
 
 
 class ReviewSerializer(serializers.ModelSerializer):

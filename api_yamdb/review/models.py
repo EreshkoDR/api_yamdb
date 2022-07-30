@@ -42,8 +42,8 @@ class Title(models.Model):
     name = models.CharField(
         'Название', max_length=200
     )
-    year = models.DateTimeField(
-        'Год выпуска', auto_now_add=True
+    year = models.IntegerField(
+        'Год выпуска'
     )
     rating = models.IntegerField(
         blank=True, default=0
