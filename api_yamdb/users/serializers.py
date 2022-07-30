@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from djoser.serializers import UserSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import AccessToken
 
 from users.models import User, VerificationEmailKey
 
@@ -30,7 +30,7 @@ class TokenSerializer(serializers.Serializer):
 
     @classmethod
     def get_token(cls, user):
-        return RefreshToken.for_user(user)
+        return AccessToken.for_user(user)
 
     def validate(self, attrs):
         username = attrs.get('username')
@@ -50,8 +50,7 @@ class TokenSerializer(serializers.Serializer):
             raise serializers.ValidationError(msg)
         user = get_object_or_404(User, username=username)
         token = self.get_token(user)
-        print(token)
-        attrs['token'] = str(token.access_token)
+        attrs['token'] = str(token)
         return attrs
 
 
@@ -85,10 +84,3 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserMeSerializer(UserSerializer):
     role = serializers.CharField(read_only=True)
-
-    class Meta:
-        model = User
-        fields = (
-            'username', 'email', 'first_name',
-            'last_name', 'bio', 'role'
-        )

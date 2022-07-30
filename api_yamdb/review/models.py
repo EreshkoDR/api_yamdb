@@ -1,7 +1,10 @@
-from django.db import models
-from django.db.models import UniqueConstraint
-from users.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
+
+from users.models import User
+
+# from django.db.models import UniqueConstraint
+
 
 class Category(models.Model):
     name = models.CharField(
@@ -68,6 +71,7 @@ class Title(models.Model):
     def __str__(self):
         return self.name
 
+
 class Review(models.Model):
     author = models.ForeignKey(
         User,
@@ -83,29 +87,39 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         related_name='reviews',
     )
-    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
+    rating = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)]
+    )
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['titles', 'author'],
                                     name='uniq_review')]
         ordering = ('-pub_date',)
+
         def __str__(self):
             return self.title
+
+
 class Comment(models.Model):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
         related_name='comments'
-        )
+    )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='comments',
-        verbose_name='Автор комментария')
+        verbose_name='Автор комментария'
+    )
     text = models.TextField(
         'Текст коментария:',
-        help_text='Оставьте коментарий в поле')
-    pub_date = models.DateTimeField('Дата коментария', auto_now_add=True, db_index=True)
+        help_text='Оставьте коментарий в поле'
+    )
+    pub_date = models.DateTimeField(
+        'Дата коментария', auto_now_add=True, db_index=True
+    )
 
     def __str__(self):
         return self.text

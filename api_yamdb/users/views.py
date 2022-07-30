@@ -16,7 +16,13 @@ class CreateModelViewSet(GenericViewSet, mixins.CreateModelMixin):
 
 
 class ConfirmationViewSet(CreateModelViewSet):
-    """Вьюсет получения ключа."""
+    """
+    ## Получения ключа верификации.
+    При обращении к эндпоинту `/auth/token/` с валидными данными создается
+    новый пользователь, на электронную почту отправляется
+    ключ верификации, который в последующем используется для
+    создаения/обновления JWT-Токена.
+    """
     serializer_class = ConfirmationCodeSerializer
     authentication_classes = []
     permission_classes = []
@@ -32,7 +38,14 @@ class ConfirmationViewSet(CreateModelViewSet):
 
 
 class TokenView(CreateModelViewSet):
-    """Получение токена."""
+    """
+    ## Получение токена.
+    При обращении к эндпоинту `/auth/token/` с валидными данными
+    создается/обновляется JWT-Токен. Токен используется для аутентификации
+    и передаётся в заголовке при каждом запросе под ключом `Bearer`.
+    Полученный токен можно обновить, отправив валилный запрос
+    на тот же эндпоинт `/auth/token/`.
+    """
     serializer_class = TokenSerializer
     authentication_classes = []
     permission_classes = []
@@ -46,8 +59,8 @@ class TokenView(CreateModelViewSet):
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-    # Вьюсет пользователей.
-    При эндпоинте "users/me/" вызвается функция get_me().
+    ## Вьюсет пользователей.
+    При эндпоинте "users/me/" вызвается функция `get_me()`.
     GET-запрос возвращает информацию о пользователе.
     PATCH-запрос обновляет информацию о пользователе.
     """

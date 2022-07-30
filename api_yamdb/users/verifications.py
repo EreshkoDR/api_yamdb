@@ -1,15 +1,15 @@
 from hashlib import sha256
-from random import choice
-from string import ascii_lowercase
 
 from django.core.mail import send_mail
 
+from api_yamdb.settings import SECRET_KEY
 from users.models import VerificationEmailKey
 
 
 def get_key():
     """Генерация ключа по sha256."""
-    key = ''.join(choice(ascii_lowercase) for _ in range(24))
+    # key = ''.join(choice(ascii_lowercase) for _ in range(24))
+    key = SECRET_KEY
     return sha256(key.encode()).hexdigest()
 
 
@@ -19,7 +19,7 @@ def send_code(user):
     затем отправляет на электронную почту сообщение с ключом.
     """
     key = get_key()
-    VerificationEmailKey.objects.create(user=user, key=key)
+    VerificationEmailKey.objects.update_or_create(user=user, key=key)
     send_mail(
         subject='Your verification key',
         message=f'Hi! your key:\n{key}',
