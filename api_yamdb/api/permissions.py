@@ -33,6 +33,7 @@ class IsModeratorPermission(permissions.BasePermission):
         return False
 
     def has_object_permission(self, request, view, obj):
+
         if request.user.is_authenticated:
             return (
                 request.user.role == 'moderator'
@@ -44,11 +45,7 @@ class IsModeratorPermission(permissions.BasePermission):
 class IsUserPermission(permissions.BasePermission):
     """Разрешения уровня `авторизированный пользователь`."""
     def has_permission(self, request, view):
-        print('Test IsUser')
-        return (
-            request.user.is_authenticated
-            and request.method in permissions.SAFE_METHODS
-        )
+        return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
         return obj.author == request.user
