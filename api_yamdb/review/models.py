@@ -3,8 +3,6 @@ from django.db import models
 
 from users.models import User
 
-# from django.db.models import UniqueConstraint
-
 
 class Category(models.Model):
     name = models.CharField(

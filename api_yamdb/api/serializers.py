@@ -1,11 +1,9 @@
 from datetime import datetime
 
-from django.http import QueryDict
-
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from review.models import Comment, Review, Category, Genre, Title, GenreTitle
+from review.models import Comment, Review, Category, Genre, Title
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -60,7 +58,6 @@ class TitleSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = '__all__'
-        # fields = '__all__'
         model = Title
 
 

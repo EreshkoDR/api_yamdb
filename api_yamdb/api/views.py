@@ -1,15 +1,16 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
-from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 
+from api.filters import TitleFilters
+from api.permissions import (IsAdminPermission, IsModeratorPermission,
+                             IsUserPermission, ReadOrAdminPermission,
+                             ReadOrUserPermission)
+from api.serializers import (CategorySerializer, CommentSerializer,
+                             GenreSerializer, ReviewSerializer,
+                             TitleCreateSerializer, TitleSerializer)
 from review.models import Category, Comment, Genre, Review, Title
-
-from .permissions import (IsAdminPermission, IsModeratorPermission,
-                          IsUserPermission, ReadOrAdminPermission, ReadOrUserPermission)
-from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer, ReviewSerializer, TitleCreateSerializer, TitleSerializer)
 
 
 class CategoryViewSet(mixins.ListModelMixin,
@@ -59,14 +60,12 @@ class TitleViewSet(viewsets.ModelViewSet):
     """
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = (
-        'category__slug', 'genre__slug', 'name', 'year'
-    )
+    filter_class = TitleFilters
     permission_classes = [ReadOrAdminPermission]
     pagination_class = LimitOffsetPagination
 
     def get_serializer_class(self):
-        if self.action == 'retieve' or self.action == 'list':
+        if self.action == 'retrieve' or self.action == 'list':
             return TitleSerializer
         return TitleCreateSerializer
 
