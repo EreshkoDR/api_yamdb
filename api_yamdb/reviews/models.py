@@ -54,7 +54,7 @@ class Title(models.Model):
         Category,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='titles'
+        related_name='title'
     )
 
     class Meta:
@@ -79,7 +79,7 @@ class Review(models.Model):
         help_text='Напишите что-нибудь сюда...'
     )
     pub_date = models.DateTimeField('Дата публикации: ', auto_now_add=True)
-    titles = models.ForeignKey(
+    title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews',
     )
     score = models.IntegerField(
@@ -89,14 +89,11 @@ class Review(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['titles', 'author'],
+                fields=['title', 'author'],
                 name='unique_titles_author'
             )
         ]
         ordering = ('-pub_date',)
-
-    def __str__(self):
-        return self.titles
 
 
 class Comment(models.Model):
@@ -118,6 +115,3 @@ class Comment(models.Model):
     pub_date = models.DateTimeField(
         'Дата коментария', auto_now_add=True, db_index=True
     )
-
-    def __str__(self):
-        return self.text[:15]
