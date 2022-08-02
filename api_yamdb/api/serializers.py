@@ -35,14 +35,6 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = Title
 
-    # def create(self, validated_data):
-    #     if self.is_valid():
-    #         genres = validated_data.pop('genre')
-    #         title = Title.objects.create(**validated_data)
-    #         for genre in genres:
-    #             GenreTitle.objects.create(title=title, genre=genre)
-    #         return title
-
 
 class TitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
@@ -70,18 +62,12 @@ class TitleSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username',
-        default=serializers.CurrentUserDefault()
+        read_only=True, slug_field='username',
     )
-    # titles = serializers.PrimaryKeyRelatedField(
-    #     read_only=True,
-    #     default=...
-    # )
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date', 'titles')
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
 
         validators = [
             UniqueTogetherValidator(

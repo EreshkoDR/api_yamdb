@@ -6,7 +6,7 @@ from review.models import Category, Comment, Genre, Review, Title
 from .filters import TitleFilter
 
 from .permissions import (
-    ReadOrAdminPermission, ReadOrUserPermission, AuthorModeratorOrAdmin
+    ReadOrAdminPermission, ReadOrUserPermission
 )
 from .serializers import (CategorySerializer,
                           CommentSerializer,
@@ -72,7 +72,6 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly(),)
 
     def get_queryset(self):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
@@ -81,11 +80,6 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
         serializer.save(author=self.request.user, review=review)
-
-    def get_permissions(self):
-        if self.action in ['retrieve', 'destroy']:
-            return (AuthorModeratorOrAdmin,)
-        return super().get_permissions()
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
