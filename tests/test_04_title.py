@@ -28,8 +28,6 @@ class Test04TitleAPI:
         data = {'name': 'Поворот туда', 'year': 2000, 'genre': [genres[0]['slug'], genres[1]['slug']],
                 'category': categories[0]['slug'], 'description': 'Крутое пике'}
         response = admin_client.post('/api/v1/titles/', data=data)
-        print(data)
-        print(response.data)
         assert response.status_code == 201, (
             'Проверьте, что при POST запросе `/api/v1/titles/` с правильными данными возвращает статус 201'
         )
