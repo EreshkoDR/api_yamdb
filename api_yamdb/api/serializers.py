@@ -21,51 +21,36 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
-    # slug = serializers.SlugRelatedField(
-    #     many=True,
-    #     slug_field='slug',
-    #     queryset=Genre.objects.all()
-    # )
-
-    def to_internal_value(self, data):
-        try:
-            obj = Genre.objects.get(slug=data)
-        except Exception:
-            msg = f'Жанра {data} не существует'
-            raise serializers.ValidationError(msg)
-        return obj
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug',
+    )
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True
+    )
 
     class Meta:
-        model = Genre
-        fields = ('name', 'slug')
+        fields = '__all__'
+        model = Title
 
-    # def to_representation(self, instance):
-    #     return {
-    #         'name': instance.name,
-    #         'slug': instance.slug
-    #     }
+    # def create(self, validated_data):
+    #     if self.is_valid():
+    #         genres = validated_data.pop('genre')
+    #         title = Title.objects.create(**validated_data)
+    #         for genre in genres:
+    #             GenreTitle.objects.create(title=title, genre=genre)
+    #         return title
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(read_only=True)
-    name = serializers.CharField()
-    category = serializers.SlugRelatedField(
-        slug_field='slug',
-        queryset=Category.objects.all()
-    )
-    genre = TitleCreateSerializer(many=True)
-    year = serializers.IntegerField()
-
-    def create(self, validated_data):
-        genres = validated_data.pop('genre')
-        title = Title.objects.create(**validated_data)
-        for genre in genres:
-            GenreTitle.objects.create(title=title, genre=genre)
-
-        return title
+    category = CategorySerializer()
+    genre = GenreSerializer(many=True)
+    rating = serializers.SerializerMethodField(method_name='get_rating')
 
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        fields = '__all__'
         model = Title
 
     def validate_year(self, value):
@@ -76,21 +61,34 @@ class TitleSerializer(serializers.ModelSerializer):
             )
         return value
 
+    def get_rating(self, instance):
+        if instance.rating == 0:
+            instance.rating = None
+            return instance.rating
+        return instance.rating
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
-        read_only=True, slug_field='username'
+        read_only=True,
+        slug_field='username',
+        default=serializers.CurrentUserDefault()
     )
+    # titles = serializers.PrimaryKeyRelatedField(
+    #     read_only=True,
+    #     default=...
+    # )
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'rating', 'pub_date')
+        fields = ('id', 'text', 'author', 'score', 'pub_date', 'titles')
 
-    validators = [
-        UniqueTogetherValidator(
-            queryset=Review.objects.all(),
-            fields=['title', 'author']
-        )]
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Review.objects.all(),
+                fields=('titles', 'author')
+            )
+        ]
 
     def validate(self, data):
         author = self.context.get('request').user
@@ -107,7 +105,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             )
         return data
 
-    def validate_rating(self, value):
+    def validate_score(self, value):
         if not 1 <= value <= 10:
             raise serializers.ValidationError('Неверная оценка')
 

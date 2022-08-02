@@ -5,10 +5,12 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, mixins
 
 from api.permissions import IsAdminPermission, IsUserPermission
-from users.models import User
-from users.serializers import (ConfirmationCodeSerializer, TokenSerializer,
-                               UserMeSerializer, UserSerializer)
-from users.verifications import send_code
+from .models import User
+from .serializers import (ConfirmationCodeSerializer,
+                          TokenSerializer,
+                          UserMeSerializer,
+                          UserSerializer)
+from .verifications import send_code
 
 
 class CreateModelViewSet(GenericViewSet, mixins.CreateModelMixin):
