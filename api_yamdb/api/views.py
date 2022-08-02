@@ -58,19 +58,17 @@ class TitleViewSet(viewsets.ModelViewSet):
     Возможна фильрация по: slug категории, slug жанра, name, year.
     """
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = (
         'category__slug', 'genre__slug', 'name', 'year'
     )
-    # lookup_field = 'pk'
-    permission_classes = []
+    permission_classes = [ReadOrAdminPermission]
     pagination_class = LimitOffsetPagination
 
-    # def get_serializer_class(self):
-    #     if self.action == 'create':
-    #         return TitleCreateSerializer
-    #     return super().get_serializer_class()
+    def get_serializer_class(self):
+        if self.action == 'retieve' or self.action == 'list':
+            return TitleSerializer
+        return TitleCreateSerializer
 
 
 class CommentViewSet(viewsets.ModelViewSet):

@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from django.http import QueryDict
+
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -21,52 +23,16 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
-    # slug = serializers.SlugRelatedField(
-    #     many=True,
-    #     slug_field='slug',
-    #     queryset=Genre.objects.all()
-    # )
-
-    def to_internal_value(self, data):
-        try:
-            obj = Genre.objects.get(slug=data)
-        except Exception:
-            msg = f'Жанра {data} не существует'
-            raise serializers.ValidationError(msg)
-        return obj
-
-    class Meta:
-        model = Genre
-        fields = ('name', 'slug')
-
-    # def to_representation(self, instance):
-    #     return {
-    #         'name': instance.name,
-    #         'slug': instance.slug
-    #     }
-
-
-class TitleSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(read_only=True)
-    name = serializers.CharField()
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all()
     )
-    genre = TitleCreateSerializer(many=True)
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True,
+    )
     year = serializers.IntegerField()
-
-    def create(self, validated_data):
-        genres = validated_data.pop('genre')
-        title = Title.objects.create(**validated_data)
-        for genre in genres:
-            GenreTitle.objects.create(title=title, genre=genre)
-
-        return title
-
-    class Meta:
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
-        model = Title
 
     def validate_year(self, value):
         year = datetime.today().year
@@ -75,6 +41,27 @@ class TitleSerializer(serializers.ModelSerializer):
                 'Проверьте год произведения'
             )
         return value
+
+    class Meta:
+        model = Title
+        fields = '__all__'
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    category = CategorySerializer()
+    genre = GenreSerializer(many=True, read_only=True)
+    rating = serializers.SerializerMethodField(method_name='get_rating')
+
+    def get_rating(self, instance):
+        if instance.rating == 0:
+            instance.rating = None
+            return instance.rating
+        return instance.rating
+
+    class Meta:
+        fields = '__all__'
+        # fields = '__all__'
+        model = Title
 
 
 class ReviewSerializer(serializers.ModelSerializer):
