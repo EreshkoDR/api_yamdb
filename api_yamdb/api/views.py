@@ -58,16 +58,14 @@ class TitleViewSet(viewsets.ModelViewSet):
     """
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_class = TitleFilter
+    filterset_class = TitleFilter
     permission_classes = [ReadOrAdminPermission]
     pagination_class = LimitOffsetPagination
 
     def get_serializer_class(self):
-        if self.action == 'retrieve' or self.action == 'list':
+        if self.action in ['retrieve', 'list']:
             return TitleSerializer
         return TitleCreateSerializer
-    permission_classes = (ReadOrAdminPermission, )
-    filterset_class = TitleFilter
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -94,4 +92,3 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
-
