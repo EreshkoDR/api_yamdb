@@ -1,7 +1,7 @@
 from django.urls import include, path
-from rest_framework.routers import DefaultRouter\
+from rest_framework.routers import DefaultRouter
 
-from users.views import ConfirmationViewSet, TokenView, UserViewSet
+from .views import ConfirmationViewSet, TokenView, UserViewSet
 
 router_v1 = DefaultRouter()
 router_v1.register(r'auth/signup', ConfirmationViewSet, basename='conf')

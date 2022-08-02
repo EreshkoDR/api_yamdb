@@ -3,7 +3,7 @@ from hashlib import sha256
 from django.core.mail import send_mail
 
 from api_yamdb.settings import SECRET_KEY
-from users.models import VerificationEmailKey
+from .models import VerificationEmailKey
 
 
 def get_key():

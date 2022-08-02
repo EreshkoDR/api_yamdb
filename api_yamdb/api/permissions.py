@@ -70,8 +70,7 @@ class ReadOrAdminPermission(permissions.BasePermission):
 class ReadOrUserPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.user.is_authenticated:
-            return(
-                request.user.role == 'user'
-                or request.user.role == 'admin'
-                or request.user.is_superuser)
+            return(request.user.role == 'user'
+                   or request.user.role == 'admin'
+                   or request.user.is_superuser)
         return request.method in permissions.SAFE_METHODS

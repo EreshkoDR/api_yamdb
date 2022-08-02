@@ -22,15 +22,24 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleCreateSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
         slug_field='slug',
-        queryset=Category.objects.all()
     )
     genre = serializers.SlugRelatedField(
-        slug_field='slug',
         queryset=Genre.objects.all(),
-        many=True,
+        slug_field='slug',
+        many=True
     )
-    year = serializers.IntegerField()
+
+    class Meta:
+        fields = '__all__'
+        model = Title
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    category = CategorySerializer()
+    genre = GenreSerializer(many=True)
+    rating = serializers.SerializerMethodField(method_name='get_rating')
 
     def validate_year(self, value):
         year = datetime.today().year
@@ -39,16 +48,6 @@ class TitleCreateSerializer(serializers.ModelSerializer):
                 'Проверьте год произведения'
             )
         return value
-
-    class Meta:
-        model = Title
-        fields = '__all__'
-
-
-class TitleSerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
-    genre = GenreSerializer(many=True, read_only=True)
-    rating = serializers.SerializerMethodField(method_name='get_rating')
 
     def get_rating(self, instance):
         if instance.rating == 0:
@@ -63,18 +62,19 @@ class TitleSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
-        read_only=True, slug_field='username'
+        read_only=True, slug_field='username',
     )
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'rating', 'pub_date')
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
 
-    validators = [
-        UniqueTogetherValidator(
-            queryset=Review.objects.all(),
-            fields=['title', 'author']
-        )]
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Review.objects.all(),
+                fields=('titles', 'author')
+            )
+        ]
 
     def validate(self, data):
         author = self.context.get('request').user
@@ -91,7 +91,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             )
         return data
 
-    def validate_rating(self, value):
+    def validate_score(self, value):
         if not 1 <= value <= 10:
             raise serializers.ValidationError('Неверная оценка')
 

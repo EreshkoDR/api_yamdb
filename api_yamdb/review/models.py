@@ -43,17 +43,9 @@ class Title(models.Model):
     year = models.IntegerField(
         'Год выпуска'
     )
-    rating = models.IntegerField(
-        blank=True, default=0
-    )
+    rating = models.IntegerField(blank=True, default=0)
     description = models.TextField(
         'Описание', blank=True
-    )
-    genre = models.ForeignKey(
-        Genre,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='titles'
     )
     genre = models.ManyToManyField(
         Genre, through='GenreTitle'
@@ -80,31 +72,31 @@ class GenreTitle(models.Model):
 
 class Review(models.Model):
     author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='reviews'
+        User, on_delete=models.CASCADE, related_name='reviews'
     )
     text = models.TextField(
         'Текст отзыва: ',
-        help_text='Напишите что-нибудь сюда...')
+        help_text='Напишите что-нибудь сюда...'
+    )
     pub_date = models.DateTimeField('Дата публикации: ', auto_now_add=True)
     titles = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE,
-        related_name='reviews',
+        Title, on_delete=models.CASCADE, related_name='reviews',
     )
-    rating = models.IntegerField(
+    score = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)]
     )
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['titles', 'author'],
-                                    name='uniq_review')]
+            models.UniqueConstraint(
+                fields=['titles', 'author'],
+                name='unique_titles_author'
+            )
+        ]
         ordering = ('-pub_date',)
 
-        def __str__(self):
-            return self.title
+    def __str__(self):
+        return self.titles
 
 
 class Comment(models.Model):
@@ -128,4 +120,4 @@ class Comment(models.Model):
     )
 
     def __str__(self):
-        return self.text
+        return self.text[:15]

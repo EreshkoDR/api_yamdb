@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import AccessToken
 
-from users.models import User, VerificationEmailKey
+from .models import User, VerificationEmailKey
 
 
 class ConfirmationCodeSerializer(serializers.Serializer):
