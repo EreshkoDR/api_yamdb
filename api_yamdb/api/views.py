@@ -4,13 +4,13 @@ from rest_framework import filters, mixins, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from reviews.models import Category, Genre, Review, Title
 
-from api.filters import TitleFilter
-from api.permissions import (ReadOrAdminPermission,
-                             CommmentAndReviewPermission)
+from .filters import TitleFilter
+from .permissions import (ReadOrAdminPermission,
+                          CommmentAndReviewPermission)
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from api.serializers import (CategorySerializer, CommentSerializer,
-                             GenreSerializer, ReviewSerializer,
-                             TitleCreateSerializer, TitleSerializer)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer,
+                          TitleCreateSerializer, TitleSerializer)
 
 
 class CategoryViewSet(mixins.ListModelMixin,

@@ -49,7 +49,9 @@ class IsUserPermission(permissions.BasePermission):
 
 
 class ReadOrAdminPermission(permissions.BasePermission):
-    """Разрешения уровня `аноним`."""
+    """Настройки доступа к Жанрам,Произведениям.
+       Полный доступ у администратора и суперпользователя
+       Только чтение у гостя, пользователя, модератора."""
     def has_permission(self, request, view):
         if request.user.is_authenticated:
             return (
