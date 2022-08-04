@@ -21,7 +21,7 @@ class User(AbstractUser):
         "Пользовательские роли",
         choices=ROLE_CHOICES,
         default=USER,
-        max_length=9,
+        max_length=15,
     )
 
 

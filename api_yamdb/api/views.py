@@ -2,21 +2,24 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from reviews.models import Category, Genre, Review, Title
 
 from .filters import TitleFilter
-from .permissions import (ReadOrAdminPermission,
-                          CommmentAndReviewPermission)
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from .permissions import CommmentAndReviewPermission, ReadOrAdminPermission
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitleCreateSerializer, TitleSerializer)
 
 
-class CategoryViewSet(mixins.ListModelMixin,
-                      mixins.CreateModelMixin,
-                      mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet):
+class ListCreateDestroyViewSet(mixins.ListModelMixin,
+                               mixins.CreateModelMixin,
+                               mixins.DestroyModelMixin,
+                               viewsets.GenericViewSet):
+    pass
+
+
+class CategoryViewSet(ListCreateDestroyViewSet):
     """
     Представление модели Category.
     Для GET-запросов доступ для всех.
@@ -31,10 +34,7 @@ class CategoryViewSet(mixins.ListModelMixin,
     permission_classes = (ReadOrAdminPermission, )
 
 
-class GenreViewSet(mixins.ListModelMixin,
-                   mixins.CreateModelMixin,
-                   mixins.DestroyModelMixin,
-                   viewsets.GenericViewSet):
+class GenreViewSet(ListCreateDestroyViewSet):
     """
     Представление модели Genre.
     Для GET-запросов доступ для всех.
@@ -68,13 +68,13 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleCreateSerializer
 
 
-""" Настройки доступа к Комментариям и Отзывам:
-полный доступ для автора, администратора, суперюзера
-право на удаление и частичное изменение у модератора
-только чтение у гостя и зарегистрированного пользователя. """
-
-
 class CommentViewSet(viewsets.ModelViewSet):
+    """
+    Настройки доступа к Комментариям и Отзывам:
+    полный доступ для автора, администратора, суперюзера
+    право на удаление и частичное изменение у модератора
+    только чтение у гостя и зарегистрированного пользователя.
+    """
     serializer_class = CommentSerializer
     permission_classes = (CommmentAndReviewPermission,
                           IsAuthenticatedOrReadOnly, )
