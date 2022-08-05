@@ -1,6 +1,7 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, viewsets
+from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from reviews.models import Category, Genre, Review, Title
@@ -10,16 +11,12 @@ from .permissions import CommmentAndReviewPermission, ReadOrAdminPermission
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitleCreateSerializer, TitleSerializer)
+# создал файл с повторяющимся кодом из CategoryViewSet и GenreViewSet
+# Получилось красивее)
+from .utils import ListCreateDestroyMixins
 
 
-class ListCreateDestroyViewSet(mixins.ListModelMixin,
-                               mixins.CreateModelMixin,
-                               mixins.DestroyModelMixin,
-                               viewsets.GenericViewSet):
-    pass
-
-
-class CategoryViewSet(ListCreateDestroyViewSet):
+class CategoryViewSet(ListCreateDestroyMixins):
     """
     Представление модели Category.
     Для GET-запросов доступ для всех.
@@ -28,13 +25,9 @@ class CategoryViewSet(ListCreateDestroyViewSet):
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
-    permission_classes = (ReadOrAdminPermission, )
 
 
-class GenreViewSet(ListCreateDestroyViewSet):
+class GenreViewSet(ListCreateDestroyMixins):
     """
     Представление модели Genre.
     Для GET-запросов доступ для всех.
@@ -43,10 +36,6 @@ class GenreViewSet(ListCreateDestroyViewSet):
     """
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
-    permission_classes = (ReadOrAdminPermission, )
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -56,11 +45,13 @@ class TitleViewSet(viewsets.ModelViewSet):
     Для POST-, DELETE- и PATCH-запросов доступ для администратора.
     Возможна фильрация по: slug категории, slug жанра, name, year.
     """
-    queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
     permission_classes = [ReadOrAdminPermission]
     pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return Title.objects.annotate(_rating=Avg('reviews__score'))
 
     def get_serializer_class(self):
         if self.action in ['retrieve', 'list']:

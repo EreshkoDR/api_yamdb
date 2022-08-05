@@ -50,8 +50,10 @@ class TitleSerializer(serializers.ModelSerializer):
             )
         return value
 
+    # После переопределения rating,
+    # по идее у нас появляется это поле и просто сюда пихаем его
     def get_rating(self, obj):
-        rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
+        rating = obj.rating
         if not rating:
             return rating
         return round(rating, 1)

@@ -43,7 +43,7 @@ class Title(models.Model):
     year = models.IntegerField(
         'Год выпуска'
     )
-    rating = models.IntegerField(blank=True, default=0)
+    # Убрал поле rating
     description = models.TextField(
         'Описание', blank=True
     )
@@ -61,6 +61,15 @@ class Title(models.Model):
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
 
+    # меняем виртуальное поле в модели и проверяем,
+    # есть ли оно у нас предварительно рассчитанным
+    # (подсмотрел на стаковерфлоу)
+    @property
+    def rating(self):
+        if hasattr(self, '_rating'):
+            return self._rating
+        return self.reviews.aggregate(models.Avg('score'))
+
     def __str__(self):
         return self.name
 
@@ -68,6 +77,9 @@ class Title(models.Model):
 class GenreTitle(models.Model):
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.title}: {self.genre}'
 
 
 class Review(models.Model):
@@ -82,7 +94,8 @@ class Review(models.Model):
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews',
     )
-    score = models.IntegerField(
+    # просто исправил на с Integer SmallInteger
+    score = models.SmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)]
     )
 
