@@ -61,9 +61,6 @@ class Title(models.Model):
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
 
-    # меняем виртуальное поле в модели и проверяем,
-    # есть ли оно у нас предварительно рассчитанным
-    # (подсмотрел на стаковерфлоу)
     @property
     def rating(self):
         if hasattr(self, '_rating'):
@@ -94,7 +91,6 @@ class Review(models.Model):
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews',
     )
-    # просто исправил на с Integer SmallInteger
     score = models.SmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)]
     )

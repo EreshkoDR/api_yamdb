@@ -1,8 +1,5 @@
 from rest_framework import permissions
-
-ADMIN = 'admin'
-MODERATOR = 'moderator'
-USER = 'user'
+from users.models import User
 
 
 class IsAdminPermission(permissions.BasePermission):
@@ -14,7 +11,7 @@ class IsAdminPermission(permissions.BasePermission):
         # "анонимный пользователь" нет поля role
         if request.user.is_authenticated:
             return (
-                request.user.role == ADMIN
+                request.user.role == User.ADMIN
                 or request.user.is_superuser
             )
         return False
@@ -22,7 +19,7 @@ class IsAdminPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.is_authenticated:
             return (
-                request.user.role == ADMIN
+                request.user.role == User.ADMIN
                 or request.user.is_superuser
             )
         return False
@@ -33,7 +30,7 @@ class IsModeratorPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.user.is_authenticated:
             return (
-                request.user.role == MODERATOR
+                request.user.role == User.MODERATOR
                 or request.user.is_superuser
             )
         return False
@@ -41,7 +38,7 @@ class IsModeratorPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.is_authenticated:
             return (
-                request.user.role == MODERATOR
+                request.user.role == User.MODERATOR
                 or request.user.is_superuser
             )
         return False
@@ -65,7 +62,7 @@ class ReadOrAdminPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.user.is_authenticated:
             return (
-                request.user.role == ADMIN
+                request.user.role == User.ADMIN
                 or request.user.is_superuser
             )
         return request.method in permissions.SAFE_METHODS
@@ -73,7 +70,7 @@ class ReadOrAdminPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.is_authenticated:
             return (
-                request.user.role == ADMIN
+                request.user.role == User.ADMIN
                 or request.user.is_superuser
             )
         return request.method in permissions.SAFE_METHODS
@@ -82,8 +79,8 @@ class ReadOrAdminPermission(permissions.BasePermission):
 class ReadOrUserPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.user.is_authenticated:
-            return (request.user.role == USER
-                    or request.user.role == ADMIN
+            return (request.user.role == User.USER
+                    or request.user.role == User.ADMIN
                     or request.user.is_superuser)
         return request.method in permissions.SAFE_METHODS
 
@@ -99,10 +96,10 @@ class CommmentAndReviewPermission(permissions.BasePermission):
         if request.user.is_authenticated:
             if request.method == ('DELETE' or 'PATCH'):
                 return (request.user.is_superuser
-                        or request.user.role == ADMIN
-                        or request.user.role == MODERATOR
+                        or request.user.role == User.ADMIN
+                        or request.user.role == User.MODERATOR
                         or obj.author == request.user)
             return (request.user.is_superuser
-                    or request.user.role == ADMIN
+                    or request.user.role == User.ADMIN
                     or obj.author == request.user)
         return (request.method in permissions.SAFE_METHODS)

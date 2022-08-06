@@ -11,8 +11,6 @@ from .permissions import CommmentAndReviewPermission, ReadOrAdminPermission
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitleCreateSerializer, TitleSerializer)
-# создал файл с повторяющимся кодом из CategoryViewSet и GenreViewSet
-# Получилось красивее)
 from .utils import ListCreateDestroyMixins
 
 
