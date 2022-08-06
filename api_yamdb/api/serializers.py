@@ -50,8 +50,6 @@ class TitleSerializer(serializers.ModelSerializer):
             )
         return value
 
-    # После переопределения rating,
-    # по идее у нас появляется это поле и просто сюда пихаем его
     def get_rating(self, obj):
         rating = obj.rating
         if not rating:

@@ -43,7 +43,6 @@ class Title(models.Model):
     year = models.IntegerField(
         'Год выпуска'
     )
-    # Убрал поле rating
     description = models.TextField(
         'Описание', blank=True
     )
